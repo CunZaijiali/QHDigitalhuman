@@ -59,9 +59,9 @@ rtmp = ["rtmp-streaming"]
 qhdigitalhuman = "qhdigitalhuman:main"
 
 [project.urls]
-# 发布到 GitHub 后把这里补成真实地址
-# Homepage = "https://github.com/<user>/QHDigitalHuman"
-# Issues = "https://github.com/<user>/QHDigitalHuman/issues"
+Homepage = "https://github.com/CunZaijiali/QHDigitalhuman"
+Repository = "https://github.com/CunZaijiali/QHDigitalhuman"
+Issues = "https://github.com/CunZaijiali/QHDigitalhuman/issues"
 
 [[tool.uv.index]]
 url = "https://download.pytorch.org/whl/cu118"
