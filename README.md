@@ -667,31 +667,31 @@ MediaMTX 默认按需启动 muxer，首个请求后要几秒才有分片。配 `
 
 ## 示例
 
-### 一段真人视频 → 动作资产 → 渲染成视频
+### 一张静态照片 → 动作资产 → 会说话的头像
 
-素材 [`docs/example.mp4`](docs/example.mp4) 是一段 3 秒的真人视频（720×1280，全身构图）。
-人脸在画面里只有 103×123 像素，而模型是按 256×256 处理的 —— **人脸占画面越大，
+素材 [`docs/static_example.jpg`](docs/static_example.jpg) 是**一张静态照片**（580×1031）。
+人脸在画面里只有 88×123 像素，而模型是按 256×256 处理的 —— **人脸占画面越大，
 最终越清晰**，所以先裁成半身像。
 
 **1. 裁剪**（裁框由检测器给出的人脸框推导，人物水平居中，头顶留 0.3 倍脸高的白）
 
 ```bash
 # 先用项目自己的检测器找到人脸框，再据此算裁剪区域
-#   face 103x138 @ (x292..395, y219..357)   ->   crop 302x538 @ (192, 178)
-ffmpeg -i docs/example.mp4 -vf "crop=302:538:192:178" \
-       -c:v libx264 -crf 16 -c:a copy docs/example-halfbody.mp4
+#   face 88x123 @ (x258..346, y270..393)   ->   crop 270x480 @ (166, 232)
+ffmpeg -i docs/static_example.jpg -vf "crop=270:480:166:232" -q:v 2 \
+       docs/static_example-cropped.jpg
 ```
 
-**2. 做资产**
+**2. 做资产**（照片会被补成一小段上下文，所以帧数是 8 而不是 1）
 
 ```bash
-$ python -m src.scripts.preprocess docs/example-halfbody.mp4 \
+$ python -m src.scripts.preprocess docs/static_example-cropped.jpg \
       --behavior IDLE --action DEFAULT --engine musetalkv15
-{ "root": "avatar/2_.../IDLE/DEFAULT/musetalkv15", "frames": 73, "faces": 73, "missed": 0 }
+{ "root": "avatar/3_.../IDLE/DEFAULT/musetalkv15", "frames": 8, "faces": 8, "missed": 0 }
 
-$ python -m src.scripts.digitalhuman check avatar/2_.../IDLE/DEFAULT/musetalkv15
-counts     : full=73 face=73 mask=73 coords=73 mask_coords=73
-shapes     : full=[538, 302, 3]  face=[256, 256, 3]  latents=[73, 8, 32, 32]
+$ python -m src.scripts.digitalhuman check avatar/3_.../IDLE/DEFAULT/musetalkv15
+counts     : full=8 face=8 mask=8 coords=8 mask_coords=8
+shapes     : full=[480, 270, 3]  face=[256, 256, 3]  latents=[8, 8, 32, 32]
 problems   : none
 ```
 
@@ -699,23 +699,23 @@ problems   : none
 
 ```bash
 $ python -m src.scripts.digitalhuman render \
-      --action-dir avatar/2_.../IDLE/DEFAULT/musetalkv15 \
-      --text "你好，我是一个数字人。这是我的口型和声音同步效果演示。" \
-      --output docs/example-musetalk.mp4
-frames    : 130
+      --action-dir avatar/3_.../IDLE/DEFAULT/musetalkv15 \
+      --text "你好，我是一张静态照片生成出来的数字人。现在你可以看到我的嘴型在跟着声音动。" \
+      --output docs/static_example-render.mp4
+frames    : 185
 blended   : True
 encoder   : ffmpeg (H.264 + AAC)
 ```
 
-**结果**：上排是源素材，下排是渲染结果。源素材的嘴一直是闭着微笑的，
-渲染后明显张开且形状随语音变化：
+**结果**：源素材是**一张完全静止的照片**（8 帧两两之间的像素差为 0），
+渲染后**只有嘴在动** —— 背景区域的帧间变化实测为 `0.000`，而嘴部是 `1.81`（峰值 `3.13`）：
 
-![源素材 vs 渲染结果](docs/example-compare.jpg)
+![静态照片生成的说话头像](docs/static_example-compare.jpg)
 
-▶ [播放渲染结果](docs/example-musetalk.mp4)（5.2 秒，302×538，H.264 + AAC，0.42 MB）
+▶ [播放渲染结果](docs/static_example-render.mp4)（7.4 秒，270×480，H.264 + AAC，126 KB）
 
-> **输出分辨率是素材决定的**。这段素材的人脸只有 103 像素宽，模型在 256×256 上工作、
-> 回贴时又缩回 103，所以诚实的输出就是 302×538 —— 放大它只会变糊。
-> 想要更清晰的成片，请换**人脸像素更多**的源素材（近景/特写）。
+> **输出分辨率是素材决定的**。这张照片的人脸只有 88 像素宽，模型在 256×256 上工作、
+> 回贴时又缩回 88，所以诚实的输出就是 270×480 —— 放大它只会变糊。
+> 想要更清晰的成片，请换**人脸像素更多**的素材（近景/特写）。
 >
-> 顺带一提：这次裁剪还顺手把原素材右下角的水印切掉了（水印在 y≈1210，裁剪到 y=716 为止）。
+> 顺带一提：这次裁剪还顺手把原图右侧的手机界面边缘切掉了。
