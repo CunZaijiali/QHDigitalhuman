@@ -1,0 +1,105 @@
+[digitalhuman]
+# ⚠️ fps 不只是「出帧速率」，它是**内容的时间线刻度**：音频特征按 `帧号/fps`
+# 对应音频时刻，动作素材也按时间线推进。实测把它降到 10 会让口型只按 40% 速度
+# 走、动作变慢动作。渲染跟不上时必须**跳帧**（生产者已自动处理），不能降 fps。
+fps = 25
+sample_rate = 16000
+bitrate = 6000000
+# 上一版是 1600000 —— 768x1344@25fps 下只有 0.06 bit/像素，嘴部会被压糊（看着
+# 像"嘴唇不动"）、画面发虚、并出现块状伪影。这个尺寸正常需要 4~8 Mbps。
+
+# x264 参数（实测：同 6000k 码率下，107 帧素材的 PSNR）
+#   ultrafast + zerolatency  = 44.0 dB   ← vendor 原来的硬编码值
+#   medium    + zerolatency  = 47.0 dB
+#   medium    + lookahead=4  = 48.8 dB   ← 现值，只多约 160ms 编码延迟
+#   medium    + 默认前瞻      = 50.2 dB   ← 更好，但前瞻会带来约 1.6s 缓冲
+x264_preset = "medium"               # 空 = 交给 FFmpeg 默认；可选 ultrafast..veryslow
+x264_tune = ""                       # 空 = 不设置。zerolatency 会禁用前瞻与 B 帧，约损失 3 dB
+x264_params = "rc-lookahead=4:bframes=1"
+render_crf = 18               # 离线 render 的输出画质（0-51，越小越好）。render 走 ffmpeg，
+                              # 输出 H.264 + AAC；找不到 ffmpeg 时退回静音的 MPEG-4
+lip_sync_engine = "musetalkv15"
+tts_engine = "volcengine"
+device = "cuda:0"
+# 默认推流地址；MediaMTX 的 HLS 观看地址由它推导（http://<host>:8888/<path>/index.m3u8）
+push_url = "rtmp://127.0.0.1:1935/live/qhdh"
+
+[paths]
+avatar_root = "avatar"
+models_root = "models"
+logs_root = "logs"
+
+[preprocessing]
+device = "cpu"
+landmarks = "dwpose"
+box_smoothing_window = 0
+output_shape = 256
+batch_size = 8
+pad_to_batch_size = true
+min_face_confidence = 0.5
+max_missed_ratio = 0.2
+frame_name_width = 8
+video_extensions = [".mp4", ".mov", ".mkv", ".avi", ".webm"]
+write_metadata = true
+
+[preprocessing.dwpose]
+config_file = "models/dwpose/rtmpose-l_8xb32-270e_coco-ubody-wholebody-384x288.py"
+weights = "models/dwpose/dw-ll_ucoco_384.pth"
+
+[preprocessing.mediapipe]
+model = "models/mediapipe/face_landmarker.task"
+
+[preprocessing.sfd]
+weights = "models/sfd/s3fd-619a316812.pth"
+sfd_fallback = true
+
+[preprocessing.vae]
+model = "models/sd-vae"
+use_float16 = false
+
+[preprocessing.face_parse]
+resnet = "models/face-parse-bisent/resnet18-5c106cde.pth"
+model = "models/face-parse-bisent/79999_iter.pth"
+
+[preprocessing.blend_mask]
+mode = "jaw"
+expand = 1.5
+upper_boundary_ratio = 0.5
+blur_ratio = 0.1
+
+[models.musetalk]
+unet = "models/musetalkV15/unet.pth"
+unet_config = "models/musetalkV15/musetalk.json"
+vae = "models/sd-vae"
+whisper = "models/whisper"
+
+[models.wav2lip]
+checkpoint = "models/wav2lip/wav2lip.pth"
+
+# TTS：选哪个引擎由 [digitalhuman].tts_engine 决定；密钥走 .env，不写在这里。
+[tts]
+sample_rate = 16000          # 合成音频采样率，需与 [digitalhuman].sample_rate 一致
+request_timeout = 120
+
+# 动作加载与轮换（对应参考项目的 action_cache_size / action_loading_strategy）
+[session]
+action_cache_size = 3          # 内存里常驻几个动作（每个动作会解码全部帧，注意内存）
+action_loading_strategy = "lazy"   # lazy | eager（eager 会把所有动作都常驻）
+preload_frames = true          # 加载动作时把帧解码进内存，消掉每帧 PNG 解码开销
+action_transition_seconds = 0.2    # 换动作时的 smoothstep 溶解时长
+rotate_after_cycles = 1        # 播满几轮完整乒乓（len(frames)*2）后换下一个动作
+video_queue_size = 32          # 出帧队列深度；批量渲染会一次涌进一批，太小会丢帧
+render_batch_size = 4          # 每次推理渲染几帧；越小投递越平滑，越大吞吐越高
+
+# 虚拟摄像头（DirectShow 设备，pyvirtualcam 驱动）
+virtual_camera_backend = "obs"     # obs -> "OBS Virtual Camera"；unitycapture -> "VTubeStudioCam"
+# virtual_camera_size = [1280, 720]  # 不写则跟随渲染帧尺寸
+# virtual_camera_device = "OBS Virtual Camera"   # 不写则用后端默认设备
+
+[tts.volcengine]
+endpoint = "https://openspeech.bytedance.com/api/v3/tts/unidirectional"
+resource_id = "seed-tts-2.0"
+speaker = "zh_female_tianmeiyueyue_uranus_bigtts"
+model = "seed-tts-2.0-standard"
+# 从 .env 读取该环境变量作为 X-Api-Key；留空或未设置时报错退出
+api_key_env = "VOLCENGINE_TTS_API_KEY"

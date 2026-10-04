@@ -1,0 +1,47 @@
+# ============ Python ============
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+
+# ============ 虚拟环境 ============
+.venv/
+venv/
+
+# ============ 密钥（绝不入库）============
+# 只忽略 .env 本身；.env.example 是模板，必须入库
+.env
+
+# ============ 模型权重（4.4 GB，不入库）============
+/models/
+
+# ============ 本地生成的资源与渲染产物 ============
+/avatar/
+/avatars/
+/logs/
+/data/
+.record/
+.render-*.mp4
+.preview-*.png
+
+# ============ 编辑器 / 系统 ============
+.idea/
+.vscode/
+*.code-workspace
+Thumbs.db
+Desktop.ini
+
+# ============ 构建缓存 ============
+target/
+# ============ 第三方推流扩展（不入库）============
+# vendor/python_rtmpstream/ 是 lipku/python_rtmpstream 的修改副本。整理本项目时
+# 无法核验其上游许可（代码托管站点在本机被解析为非公网地址），为避免再分发风险，
+# 不纳入本仓库。获取与构建方式见 README「推流扩展」一节。
+/vendor/
+
+# ============ 设计草稿（不入库）============
+ARCHITECTURE.md

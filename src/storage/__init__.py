@@ -1,0 +1,41 @@
+"""On-disk layout for digital-human resources."""
+
+from .paths import (
+    ASSETS_BY_ENGINE,
+    COORDS_FILE,
+    DEFAULT_ASSETS,
+    FACE_DIR,
+    FULL_DIR,
+    IMAGE_DIRS,
+    LATENTS_FILE,
+    MASK_COORDS_FILE,
+    MASK_DIR,
+    METADATA_FILE,
+    ActionPaths,
+    allocate_index,
+    assets_for,
+    build_action_dir,
+    frame_name,
+    normalize_engine,
+    resolve_root,
+)
+
+__all__ = [
+    "ASSETS_BY_ENGINE",
+    "COORDS_FILE",
+    "DEFAULT_ASSETS",
+    "FACE_DIR",
+    "FULL_DIR",
+    "IMAGE_DIRS",
+    "LATENTS_FILE",
+    "MASK_COORDS_FILE",
+    "MASK_DIR",
+    "METADATA_FILE",
+    "ActionPaths",
+    "allocate_index",
+    "assets_for",
+    "build_action_dir",
+    "frame_name",
+    "normalize_engine",
+    "resolve_root",
+]

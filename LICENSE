@@ -1,0 +1,47 @@
+MIT License
+
+Copyright (c) 2026 CunZai
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+Third-party notice
+------------------
+
+The MIT license above covers the original code in this repository. It does NOT
+cover third-party components, which keep their own licenses:
+
+* RTMP streaming extension -- NOT distributed here.
+
+  Upstream: https://github.com/lipku/python_rtmpstream (the C++/pybind11
+  extension this project modifies). Its license could not be verified when this
+  repository was prepared: the code hosting sites were unreachable from the
+  build environment (their hostnames resolved to non-public addresses). To avoid
+  redistributing a work whose terms are unknown, the modified copy has been
+  excluded from this repository (see .gitignore, and "第三方组件与来源" in
+  README.md). Obtain it from upstream yourself and comply with upstream's terms.
+
+* Model weights (MuseTalk, SD-VAE, Whisper, wav2lip, DWPose, SFD, MediaPipe,
+  face-parse-bisent) are NOT distributed here. Each has its own license; obtain
+  them from their upstream projects and comply with those terms.
+
+* FFmpeg and MediaMTX are external programs, used through their normal public
+  interfaces and not bundled here.
+

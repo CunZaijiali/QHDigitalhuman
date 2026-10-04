@@ -1,0 +1,14 @@
+# 仓库内统一用 LF。Windows 上不做 CRLF 来回转换，避免无关的行尾 diff。
+* text=auto eol=lf
+
+# 二进制文件不做任何转换
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.mp4  binary
+*.ico  binary
+*.pth  binary
+*.pyd  binary
+*.dll  binary
+*.so   binary
